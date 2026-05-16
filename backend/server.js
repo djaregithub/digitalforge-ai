@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const mysql = require('mysql2/promise');
 
 const invoiceRoutes = require('./routes/invoices');
@@ -16,7 +17,9 @@ app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 // SPA-style routes — serve HTML for clean URLs
 app.get('/create', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'frontend', 'create.html'));
+    let html = fs.readFileSync(path.join(__dirname, '..', 'frontend', 'create.html'), 'utf8');
+    html = html.replace('__DEFAULT_WALLET__', process.env.DEFAULT_WALLET || '');
+    res.send(html);
 });
 app.get('/pay/:code', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'frontend', 'pay.html'));

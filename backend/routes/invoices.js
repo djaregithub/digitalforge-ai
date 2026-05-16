@@ -20,7 +20,10 @@ router.post('/create', async (req, res) => {
 
         // Validate
         if (!amount || !merchant_wallet) {
-            return res.status(400).json({ error: 'amount and merchant_wallet are required' });
+            if (!amount) return res.status(400).json({ error: 'amount is required' });
+            // Use default wallet if not provided
+            merchant_wallet = merchant_wallet || process.env.DEFAULT_WALLET;
+            if (!merchant_wallet) return res.status(400).json({ error: 'merchant_wallet is required or set DEFAULT_WALLET' });
         }
         if (amount <= 0) {
             return res.status(400).json({ error: 'amount must be positive' });
