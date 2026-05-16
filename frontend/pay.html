@@ -277,64 +277,45 @@
         const contentArea = document.getElementById('content-area');
         let countdownInterval;
 
-        // --- MOCK API ---
-        // In a real application, these would be actual fetch() calls.
-        const mockApi = {
-            getInvoice: (code) => {
-                console.log(`Fetching invoice: ${code}`);
-                return new Promise((resolve, reject) => {
-                    setTimeout(() => {
-                        if (code === 'EXPIRED-INVOICE') {
-                            resolve({
-                                ok: true,
-                                json: () => Promise.resolve({
-                                    status: 'expired',
-                                    code: code,
-                                    merchant_name: "DigitalForge AI",
-                                    amount: "100.00",
-                                    token: "USDT",
-                                    network: "Polygon",
-                                })
-                            });
-                        } else if (code === 'NOT-FOUND') {
-                            reject(new Error('Invoice not found'));
-                        } else {
-                            const expires_at = new Date(Date.now() + 15 * 60 * 1000).toISOString();
-                            resolve({
-                                ok: true,
-                                json: () => Promise.resolve({
-                                    status: 'pending',
-                                    code: code,
-                                    merchant_name: "DigitalForge AI",
-                                    amount: "150.00",
-                                    token: "USDC",
-                                    network: "Polygon",
-                                    wallet_address: "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B",
-                                    expires_at: expires_at
-                                })
-                            });
-                        }
-                    }, 1500);
-                });
+        // --- REAL API ---
+        const RealApi = {
+            getInvoice: async (code) => {
+                const res = await fetch(`/api/invoices/${code}`);
+                if (!res.ok) throw new Error('Invoice not found');
+                const data = await res.json();
+                if (!data.success) throw new Error('Invoice not found');
+                const inv = data.invoice;
+                return {
+                    ok: true,
+                    json: () => Promise.resolve({
+                        status: inv.status,
+                        code: inv.invoice_code,
+                        merchant_name: inv.merchant_name || 'DigitalForge AI',
+                        amount: inv.amount,
+                        token: inv.token,
+                        network: inv.network,
+                        wallet_address: inv.merchant_wallet,
+                        expires_at: inv.expires_at
+                    })
+                };
             },
-            confirmPayment: (code, tx_hash) => {
-                console.log(`Confirming payment for ${code} with hash ${tx_hash}`);
-                return new Promise((resolve, reject) => {
-                    setTimeout(() => {
-                        if (!tx_hash || tx_hash.length < 10) {
-                            reject(new Error('Invalid transaction hash'));
-                        } else {
-                            resolve({
-                                ok: true,
-                                json: () => Promise.resolve({
-                                    status: 'confirmed',
-                                    tx_hash: tx_hash,
-                                    explorer_url: `https://polygonscan.com/tx/${tx_hash}`
-                                })
-                            });
-                        }
-                    }, 2000);
+            confirmPayment: async (code, tx_hash) => {
+                const res = await fetch('/api/payments/confirm', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ invoice_code: code, tx_hash })
                 });
+                const data = await res.json();
+                if (!res.ok || !data.success) throw new Error(data.error || 'Confirmation failed');
+                return {
+                    ok: true,
+                    json: () => Promise.resolve({
+                        status: 'confirmed',
+                        tx_hash: tx_hash,
+                        payer_wallet: data.invoice?.payer_wallet || '',
+                        explorer_url: `https://polygonscan.com/tx/${tx_hash}`
+                    })
+                };
             }
         };
 
@@ -380,6 +361,13 @@
                 <h2 class="status-title">Payment Confirmed!</h2>
                 <p class="status-message">Your transaction has been confirmed. Thank you for your payment.</p>
                 <a href="${data.explorer_url}" target="_blank" class="link">View on Polygonscan</a>
+                <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border-color)">
+                    <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:1rem">Want to accept crypto too? Get paid in USDT/USDC instantly.</p>
+                    <input type="text" id="vl-wallet" class="input-field" placeholder="Your Polygon wallet (0x...)" value="${data.payer_wallet || ''}" style="margin-bottom:0.5rem">
+                    <input type="text" id="vl-name" class="input-field" placeholder="Your name (optional)" style="margin-bottom:0.5rem">
+                    <button onclick="registerViralMerchant()" id="vl-btn" class="btn" style="margin-top:0.5rem">Start Accepting Crypto</button>
+                    <div id="vl-result" style="margin-top:0.8rem;font-size:0.85rem;display:none"></div>
+                </div>
             `,
 
             expired: () => `
@@ -433,6 +421,35 @@
             }, 1000);
         }
 
+        // --- VIRAL LOOP ---
+        window.registerViralMerchant = async function() {
+            const wallet = document.getElementById('vl-wallet').value.trim();
+            const name = document.getElementById('vl-name').value.trim();
+            const btn = document.getElementById('vl-btn');
+            const result = document.getElementById('vl-result');
+            if (!/^0x[a-fA-F0-9]{40}$/.test(wallet)) {
+                result.style.display = 'block'; result.style.color = 'var(--error-color)';
+                result.textContent = 'Enter a valid Polygon wallet address'; return;
+            }
+            btn.disabled = true; btn.textContent = 'Registering...';
+            try {
+                const res = await fetch('/api/invoices/register-merchant', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ wallet_address: wallet, name })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    result.style.display = 'block'; result.style.color = 'var(--success-color)';
+                    result.innerHTML = 'You are now a merchant! <a href="/create?wallet=' + wallet + '" style="color:var(--primary-accent)">Create your first invoice</a>';
+                    btn.textContent = 'Done!';
+                } else throw new Error(data.error);
+            } catch(e) {
+                result.style.display = 'block'; result.style.color = 'var(--error-color)';
+                result.textContent = 'Error: ' + e.message;
+                btn.disabled = false; btn.textContent = 'Start Accepting Crypto';
+            }
+        };
+
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(() => {
                 const btn = document.getElementById('copy-btn');
@@ -461,7 +478,7 @@
             btn.querySelector('.btn-loader').style.display = 'inline-block';
 
             try {
-                const response = await mockApi.confirmPayment(currentInvoiceData.code, txHash);
+                const response = await RealApi.confirmPayment(currentInvoiceData.code, txHash);
                 if (!response.ok) throw new Error('Confirmation failed');
                 const result = await response.json();
                 renderState('success', result);
@@ -479,7 +496,7 @@
             const invoiceCode = path.substring(path.lastIndexOf('/') + 1) || 'DEFAULT-INVOICE';
 
             try {
-                const response = await mockApi.getInvoice(invoiceCode);
+                const response = await RealApi.getInvoice(invoiceCode);
                 if (!response.ok) throw new Error('Failed to fetch invoice');
                 
                 const data = await response.json();
