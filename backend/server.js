@@ -8,6 +8,7 @@ const mysql = require('mysql2/promise');
 const invoiceRoutes = require('./routes/invoices');
 const paymentRoutes = require('./routes/payments');
 const creditRoutes = require('./routes/credits');
+const referralRoutes = require('./routes/referral');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -61,6 +62,7 @@ app.use((req, res, next) => {
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/credits', creditRoutes);
+app.use('/api/referral', referralRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
