@@ -1,0 +1,502 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DigitalForge AI - Pay Invoice</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --background-color: #111827;
+            --card-background: #1F2937;
+            --text-primary: #F9FAFB;
+            --text-secondary: #9CA3AF;
+            --border-color: #374151;
+            --primary-accent: #4F46E5;
+            --secondary-accent: #8B5CF6;
+            --success-color: #10B981;
+            --error-color: #EF4444;
+            --gradient: linear-gradient(to right, var(--primary-accent), var(--secondary-accent));
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #payment-container {
+            width: 100%;
+            max-width: 420px;
+            background-color: var(--card-background);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            padding: 32px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .header {
+            margin-bottom: 24px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        .content {
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* States */
+        .loader {
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-accent);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .amount-display {
+            margin-bottom: 20px;
+        }
+
+        .amount {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .token {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-left: 8px;
+        }
+
+        #qrcode {
+            background-color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+        #qrcode img {
+            display: block;
+        }
+
+        .countdown {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        .wallet-address-container {
+            width: 100%;
+            display: flex;
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .wallet-address {
+            flex-grow: 1;
+            padding: 12px 16px;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-secondary);
+            text-align: left;
+        }
+
+        .copy-btn {
+            background-color: transparent;
+            border: none;
+            border-left: 1px solid var(--border-color);
+            padding: 0 16px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+        .copy-btn:hover {
+            color: var(--text-primary);
+        }
+        .copy-btn svg {
+            width: 16px;
+            height: 16px;
+            vertical-align: middle;
+        }
+        .copy-btn.copied {
+            color: var(--success-color);
+        }
+
+        .primary-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: var(--gradient);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .primary-btn:hover {
+            opacity: 0.9;
+        }
+        .primary-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .form-group {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            text-align: left;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.5);
+        }
+
+        .status-icon {
+            margin-bottom: 20px;
+        }
+        .status-icon svg {
+            width: 64px;
+            height: 64px;
+        }
+        .status-icon.success svg {
+            color: var(--success-color);
+        }
+        .status-icon.expired svg {
+            color: var(--error-color);
+        }
+
+        .status-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .status-message {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .link {
+            color: var(--secondary-accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="payment-container">
+        <div class="header">
+            <div class="logo">DigitalForge AI</div>
+            <div class="subtitle">Crypto Invoice</div>
+        </div>
+        <div class="content" id="content-area">
+            <!-- Content is rendered here by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        const contentArea = document.getElementById('content-area');
+        let countdownInterval;
+
+        // --- MOCK API ---
+        // In a real application, these would be actual fetch() calls.
+        const mockApi = {
+            getInvoice: (code) => {
+                console.log(`Fetching invoice: ${code}`);
+                return new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        if (code === 'EXPIRED-INVOICE') {
+                            resolve({
+                                ok: true,
+                                json: () => Promise.resolve({
+                                    status: 'expired',
+                                    code: code,
+                                    merchant_name: "DigitalForge AI",
+                                    amount: "100.00",
+                                    token: "USDT",
+                                    network: "Polygon",
+                                })
+                            });
+                        } else if (code === 'NOT-FOUND') {
+                            reject(new Error('Invoice not found'));
+                        } else {
+                            const expires_at = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+                            resolve({
+                                ok: true,
+                                json: () => Promise.resolve({
+                                    status: 'pending',
+                                    code: code,
+                                    merchant_name: "DigitalForge AI",
+                                    amount: "150.00",
+                                    token: "USDC",
+                                    network: "Polygon",
+                                    wallet_address: "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B",
+                                    expires_at: expires_at
+                                })
+                            });
+                        }
+                    }, 1500);
+                });
+            },
+            confirmPayment: (code, tx_hash) => {
+                console.log(`Confirming payment for ${code} with hash ${tx_hash}`);
+                return new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        if (!tx_hash || tx_hash.length < 10) {
+                            reject(new Error('Invalid transaction hash'));
+                        } else {
+                            resolve({
+                                ok: true,
+                                json: () => Promise.resolve({
+                                    status: 'confirmed',
+                                    tx_hash: tx_hash,
+                                    explorer_url: `https://polygonscan.com/tx/${tx_hash}`
+                                })
+                            });
+                        }
+                    }, 2000);
+                });
+            }
+        };
+
+        // --- STATE TEMPLATES ---
+        const templates = {
+            loading: () => `<div class="loader"></div>`,
+            
+            payment: (data) => `
+                <div class="amount-display">
+                    <span class="amount">${data.amount}</span>
+                    <span class="token">${data.token}</span>
+                </div>
+                <div id="qrcode"></div>
+                <div class="countdown" id="countdown-timer">Expires in 15:00</div>
+                <div class="wallet-address-container">
+                    <span class="wallet-address">${data.wallet_address}</span>
+                    <button class="copy-btn" id="copy-btn" title="Copy address">
+                        <svg id="copy-icon-default" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 4.625v2.625a2.625 2.625 0 11-5.25 0v-2.625m0-3.875V9.375c0-.621.504-1.125 1.125-1.125h1.5c.621 0 1.125.504 1.125 1.125v3.875m-3.75 0h3.75" /></svg>
+                        <svg id="copy-icon-success" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                    </button>
+                </div>
+                <button class="primary-btn" id="sent-payment-btn">I Sent Payment</button>
+            `,
+
+            confirmTx: (data) => `
+                <p class="status-message" style="margin-bottom: 20px;">Enter the transaction hash (TxHash) to confirm your payment.</p>
+                <form id="confirm-form">
+                    <div class="form-group">
+                        <label for="tx_hash" class="form-label">Transaction Hash</label>
+                        <input type="text" id="tx_hash" class="form-input" placeholder="0x..." required>
+                    </div>
+                    <button type="submit" class="primary-btn" id="confirm-submit-btn">
+                        <span class="btn-text">Confirm Payment</span>
+                        <span class="btn-loader" style="display: none;"><div class="loader" style="width:20px; height:20px; border-width: 2px; display: inline-block;"></div></span>
+                    </button>
+                </form>
+            `,
+            
+            success: (data) => `
+                <div class="status-icon success">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                <h2 class="status-title">Payment Confirmed!</h2>
+                <p class="status-message">Your transaction has been confirmed. Thank you for your payment.</p>
+                <a href="${data.explorer_url}" target="_blank" class="link">View on Polygonscan</a>
+            `,
+
+            expired: () => `
+                <div class="status-icon expired">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+                </div>
+                <h2 class="status-title">Invoice Expired</h2>
+                <p class="status-message">This invoice has expired. Please create a new one.</p>
+            `
+        };
+
+        // --- STATE MANAGEMENT ---
+        let currentInvoiceData = null;
+
+        function renderState(state, data) {
+            if (countdownInterval) clearInterval(countdownInterval);
+            contentArea.innerHTML = templates[state](data);
+            
+            if (state === 'payment') {
+                new QRCode(document.getElementById("qrcode"), {
+                    text: data.wallet_address,
+                    width: 180,
+                    height: 180,
+                });
+                startCountdown(data.expires_at);
+                document.getElementById('copy-btn').addEventListener('click', () => copyToClipboard(data.wallet_address));
+                document.getElementById('sent-payment-btn').addEventListener('click', () => renderState('confirmTx', data));
+            } else if (state === 'confirmTx') {
+                document.getElementById('confirm-form').addEventListener('submit', handleConfirmSubmit);
+            }
+        }
+
+        // --- LOGIC & EVENT HANDLERS ---
+        function startCountdown(expiresAt) {
+            const countdownEl = document.getElementById('countdown-timer');
+            const endTime = new Date(expiresAt).getTime();
+
+            countdownInterval = setInterval(() => {
+                const now = new Date().getTime();
+                const distance = endTime - now;
+
+                if (distance < 0) {
+                    clearInterval(countdownInterval);
+                    renderState('expired');
+                    return;
+                }
+
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                countdownEl.textContent = `Expires in ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById('copy-btn');
+                const defaultIcon = document.getElementById('copy-icon-default');
+                const successIcon = document.getElementById('copy-icon-success');
+                
+                btn.classList.add('copied');
+                defaultIcon.style.display = 'none';
+                successIcon.style.display = 'inline-block';
+
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    defaultIcon.style.display = 'inline-block';
+                    successIcon.style.display = 'none';
+                }, 2000);
+            });
+        }
+
+        async function handleConfirmSubmit(event) {
+            event.preventDefault();
+            const txHash = document.getElementById('tx_hash').value;
+            const btn = document.getElementById('confirm-submit-btn');
+            
+            btn.disabled = true;
+            btn.querySelector('.btn-text').style.display = 'none';
+            btn.querySelector('.btn-loader').style.display = 'inline-block';
+
+            try {
+                const response = await mockApi.confirmPayment(currentInvoiceData.code, txHash);
+                if (!response.ok) throw new Error('Confirmation failed');
+                const result = await response.json();
+                renderState('success', result);
+            } catch (error) {
+                alert(error.message);
+                btn.disabled = false;
+                btn.querySelector('.btn-text').style.display = 'inline-block';
+                btn.querySelector('.btn-loader').style.display = 'none';
+            }
+        }
+
+        async function initialize() {
+            renderState('loading');
+            const path = window.location.pathname;
+            const invoiceCode = path.substring(path.lastIndexOf('/') + 1) || 'DEFAULT-INVOICE';
+
+            try {
+                const response = await mockApi.getInvoice(invoiceCode);
+                if (!response.ok) throw new Error('Failed to fetch invoice');
+                
+                const data = await response.json();
+                currentInvoiceData = data;
+
+                if (data.status === 'expired' || new Date(data.expires_at) < new Date()) {
+                    renderState('expired');
+                } else {
+                    renderState('payment', data);
+                }
+            } catch (error) {
+                console.error(error);
+                renderState('expired');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', initialize);
+    </script>
+
+</body>
+</html>

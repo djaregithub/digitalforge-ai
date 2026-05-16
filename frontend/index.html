@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DigitalForge AI - Crypto Invoice Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #0a0a0f; color: #e0e0e0; overflow-x: hidden; }
+        
+        /* Animated gradient background */
+        .bg-glow { position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; z-index: -1; background: radial-gradient(ellipse at 20% 50%, rgba(88, 28, 135, 0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%), radial-gradient(ellipse at 50% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 50%); animation: glowShift 15s ease-in-out infinite alternate; }
+        @keyframes glowShift { 0% { transform: translate(0, 0) rotate(0deg); } 100% { transform: translate(-5%, 5%) rotate(5deg); } }
+        
+        /* Nav */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2rem; max-width: 1280px; margin: 0 auto; }
+        .logo { font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #a78bfa, #60a5fa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo span { background: none; -webkit-text-fill-color: #e0e0e0; font-weight: 400; }
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
+        .nav-links a { color: #a0a0a8; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+        .nav-links a:hover { color: #fff; }
+        .btn-nav { background: linear-gradient(135deg, #7c3aed, #3b82f6); color: #fff !important; padding: 0.6rem 1.5rem; border-radius: 8px; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s; }
+        .btn-nav:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4); }
+        
+        /* Hero */
+        .hero { text-align: center; padding: 6rem 2rem 4rem; max-width: 800px; margin: 0 auto; }
+        .hero-badge { display: inline-block; background: rgba(124, 58, 237, 0.15); color: #a78bfa; padding: 0.4rem 1rem; border-radius: 100px; font-size: 0.8rem; border: 1px solid rgba(124, 58, 237, 0.3); margin-bottom: 1.5rem; }
+        .hero h1 { font-size: 3.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; background: linear-gradient(135deg, #fff 0%, #a78bfa 50%, #60a5fa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 1.2rem; color: #888; max-width: 600px; margin: 0 auto 2rem; line-height: 1.6; }
+        .btn-primary { display: inline-block; background: linear-gradient(135deg, #7c3aed, #3b82f6); color: #fff; padding: 1rem 2.5rem; border-radius: 12px; font-size: 1.1rem; font-weight: 600; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; border: none; cursor: pointer; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124, 58, 237, 0.5); }
+        .btn-secondary { display: inline-block; background: rgba(255,255,255,0.05); color: #e0e0e0; padding: 1rem 2.5rem; border-radius: 12px; font-size: 1.1rem; font-weight: 600; text-decoration: none; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.2s, border-color 0.2s; margin-left: 1rem; }
+        .btn-secondary:hover { transform: translateY(-2px); border-color: rgba(124, 58, 237, 0.5); }
+        .hero-actions { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 1rem; }
+        .hero-stats { display: flex; justify-content: center; gap: 3rem; margin-top: 3rem; }
+        .stat { text-align: center; }
+        .stat-num { font-size: 1.8rem; font-weight: 700; color: #fff; }
+        .stat-label { font-size: 0.85rem; color: #666; margin-top: 0.3rem; }
+        
+        /* Sections */
+        section { padding: 5rem 2rem; max-width: 1200px; margin: 0 auto; }
+        .section-tag { text-align: center; color: #a78bfa; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 0.5rem; }
+        .section-title { text-align: center; font-size: 2.2rem; font-weight: 700; color: #fff; margin-bottom: 1rem; }
+        .section-sub { text-align: center; color: #666; max-width: 600px; margin: 0 auto 3rem; font-size: 1rem; }
+        
+        /* Features */
+        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        .feature-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 2rem; transition: transform 0.3s, border-color 0.3s; }
+        .feature-card:hover { transform: translateY(-4px); border-color: rgba(124, 58, 237, 0.3); }
+        .feature-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.2rem; font-size: 1.5rem; }
+        .feature-card h3 { font-size: 1.2rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem; }
+        .feature-card p { font-size: 0.9rem; color: #666; line-height: 1.6; }
+        
+        /* Steps */
+        .steps { display: flex; justify-content: center; gap: 2rem; position: relative; }
+        .step { text-align: center; flex: 1; max-width: 300px; }
+        .step-num { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #3b82f6); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; margin: 0 auto 1rem; color: #fff; }
+        .step h4 { font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 0.5rem; }
+        .step p { font-size: 0.9rem; color: #666; }
+        
+        /* Pricing */
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        .pricing-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 2.5rem 2rem; text-align: center; transition: transform 0.3s, border-color 0.3s; position: relative; }
+        .pricing-card.featured { border-color: rgba(124, 58, 237, 0.4); background: rgba(124, 58, 237, 0.05); }
+        .pricing-card:hover { transform: translateY(-4px); }
+        .pricing-card.featured .badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #7c3aed, #3b82f6); padding: 0.3rem 1rem; border-radius: 100px; font-size: 0.75rem; font-weight: 600; color: #fff; }
+        .price { font-size: 2.5rem; font-weight: 800; color: #fff; margin: 1rem 0; }
+        .price span { font-size: 1rem; color: #666; font-weight: 400; }
+        .pricing-card ul { list-style: none; text-align: left; margin: 1.5rem 0; }
+        .pricing-card ul li { padding: 0.5rem 0; color: #a0a0a8; font-size: 0.9rem; }
+        .pricing-card ul li::before { content: '\2713'; color: #4ade80; margin-right: 0.5rem; }
+        .btn-plan { display: block; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #e0e0e0; padding: 0.8rem; border-radius: 8px; text-decoration: none; font-weight: 600; transition: background 0.2s; margin-top: 1.5rem; }
+        .btn-plan:hover { background: rgba(124, 58, 237, 0.2); border-color: rgba(124, 58, 237, 0.4); }
+        .btn-plan.featured { background: linear-gradient(135deg, #7c3aed, #3b82f6); border: none; color: #fff; }
+        .btn-plan.featured:hover { box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4); }
+        
+        /* CTA */
+        .cta-section { text-align: center; background: linear-gradient(135deg, rgba(124,58,237,0.1), rgba(59,130,246,0.1)); border-radius: 24px; padding: 4rem 2rem; margin: 2rem; max-width: 1000px; margin-left: auto; margin-right: auto; border: 1px solid rgba(124,58,237,0.2); }
+        .cta-section h2 { font-size: 2.2rem; font-weight: 700; color: #fff; margin-bottom: 1rem; }
+        .cta-section p { color: #888; margin-bottom: 2rem; }
+        
+        /* Footer */
+        footer { text-align: center; padding: 2rem; color: #444; font-size: 0.85rem; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 3rem; }
+        
+        /* Floating button */
+        .float-btn { position: fixed; bottom: 2rem; right: 2rem; background: linear-gradient(135deg, #7c3aed, #3b82f6); color: #fff; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4); cursor: pointer; transition: transform 0.2s; border: none; z-index: 100; text-decoration: none; }
+        .float-btn:hover { transform: scale(1.1); }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.2rem; }
+            .features-grid, .pricing-grid { grid-template-columns: 1fr; }
+            .steps { flex-direction: column; align-items: center; }
+            .hero-stats { flex-direction: column; gap: 1.5rem; }
+            .nav-links a:not(.btn-nav) { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow"></div>
+    
+    <nav>
+        <div class="logo">DigitalForge<span> AI</span></div>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#how">How It Works</a>
+            <a href="/create" class="btn-nav">Create Invoice</a>
+        </div>
+    </nav>
+    
+    <section class="hero">
+        <div class="hero-badge">&#9889; Stablecoin Payments &#8226; Polygon Network</div>
+        <h1>Crypto Invoices.<br>Simplified.</h1>
+        <p>Generate stablecoin payment links in seconds. Share with clients anywhere in the world. Get paid in USDT or USDC on Polygon.</p>
+        <div class="hero-actions">
+            <a href="/create" class="btn-primary">Create Your First Invoice</a>
+            <a href="#how" class="btn-secondary">How It Works &#8595;</a>
+        </div>
+        <div class="hero-stats">
+            <div class="stat"><div class="stat-num">$0</div><div class="stat-label">Setup Cost</div></div>
+            <div class="stat"><div class="stat-num">10s</div><div class="stat-label">To Generate</div></div>
+            <div class="stat"><div class="stat-num">Polygon</div><div class="stat-label">Network</div></div>
+        </div>
+    </section>
+    
+    <section id="features">
+        <div class="section-tag">Features</div>
+        <h2 class="section-title">Built for Freelancers, Powered by Crypto</h2>
+        <p class="section-sub">No monthly fees to start. No chargebacks. Global payments in seconds.</p>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon" style="background: rgba(124,58,237,0.15); color: #a78bfa;">&#9889;</div>
+                <h3>Instant Invoice</h3>
+                <p>Create a professional invoice in 10 seconds. Just enter amount, wallet, and share the link.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background: rgba(59,130,246,0.15); color: #60a5fa;">&#9673;</div>
+                <h3>QR Code Ready</h3>
+                <p>Every invoice comes with a scannable QR code. Your clients can pay directly from their wallet app.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background: rgba(16,185,129,0.15); color: #34d399;">&#x21BB;</div>
+                <h3>Viral Loop</h3>
+                <p>After payment, your client sees: "Want to accept crypto too?" — turning payers into merchants.</p>
+            </div>
+        </div>
+    </section>
+    
+    <section id="how">
+        <div class="section-tag">How It Works</div>
+        <h2 class="section-title">Three Simple Steps</h2>
+        <p class="section-sub">No registration required. No KYC. Just pure peer-to-peer crypto payments.</p>
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">1</div>
+                <h4>Create Invoice</h4>
+                <p>Enter the amount, select token (USDT/USDC), and paste your wallet address. Hit generate.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <h4>Share the Link</h4>
+                <p>Send the payment link or QR code to your client via email, WhatsApp, Telegram, or any messenger.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <h4>Get Paid</h4>
+                <p>Your client pays directly to your wallet. You receive USDT/USDC in your wallet. No middleman.</p>
+            </div>
+        </div>
+    </section>
+    
+    <section id="pricing">
+        <div class="section-tag">Pricing</div>
+        <h2 class="section-title">Pay Only When You Invoice</h2>
+        <p class="section-sub">Start with a one-time payment. Upgrade as your business grows.</p>
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <h3>Starter</h3>
+                <div class="price">$5 <span>one-time</span></div>
+                <ul>
+                    <li>20 invoices</li>
+                    <li>Valid 30 days</li>
+                    <li>QR code per invoice</li>
+                    <li>Email notifications</li>
+                </ul>
+                <a href="/create" class="btn-plan">Get Started</a>
+            </div>
+            <div class="pricing-card featured">
+                <div class="badge">Most Popular</div>
+                <h3>Pro</h3>
+                <div class="price">$12 <span>/ month</span></div>
+                <ul>
+                    <li>200 invoices / month</li>
+                    <li>Payment analytics</li>
+                    <li>Custom branding</li>
+                    <li>Priority support</li>
+                </ul>
+                <a href="/create" class="btn-plan featured">Get Started</a>
+            </div>
+            <div class="pricing-card">
+                <h3>Business</h3>
+                <div class="price">$49 <span>/ month</span></div>
+                <ul>
+                    <li>Unlimited invoices</li>
+                    <li>API access</li>
+                    <li>Multi-wallet support</li>
+                    <li>White-label option</li>
+                </ul>
+                <a href="/create" class="btn-plan">Get Started</a>
+            </div>
+        </div>
+    </section>
+    
+    <div class="cta-section">
+        <h2>Ready to Get Paid in Crypto?</h2>
+        <p>Join thousands of freelancers accepting stablecoin payments. No monthly commitment required.</p>
+        <a href="/create" class="btn-primary">Create Your First Invoice — Free</a>
+    </div>
+    
+    <footer>
+        Powered by DigitalForge AI &mdash; Autonomous Crypto Invoicing &bull; &copy; 2026
+    </footer>
+    
+    <a href="/create" class="float-btn" title="Create Invoice">+</a>
+</body>
+</html>
