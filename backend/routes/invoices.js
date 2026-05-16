@@ -28,6 +28,15 @@ router.post('/create', async (req, res) => {
             return res.status(400).json({ error: 'invalid wallet address' });
         }
 
+        // Check credit balance
+        const [merchant] = await req.db.execute(
+            'SELECT credits FROM merchants WHERE wallet_address = ?', [merchant_wallet]
+        );
+        let credits = merchant.length > 0 ? merchant[0].credits : 3;
+        if (credits <= 0) {
+            return res.status(402).json({ error: 'no credits remaining', payment_required: true, buy_url: '/buy-credits' });
+        }
+
         const id = uuidv4();
         const invoiceCode = generateInvoiceCode();
         const selectedToken = token || 'USDT';
@@ -41,6 +50,14 @@ router.post('/create', async (req, res) => {
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [id, invoiceCode, merchant_name || '', merchant_wallet, amount, selectedToken, selectedNetwork, expiresAt, email_merchant || null, memo || null]
         );
+
+        // Deduct credit (unless default owner wallet)
+        if (merchant_wallet !== (process.env.DEFAULT_WALLET || '')) {
+            await req.db.execute(
+                'UPDATE merchants SET credits = credits - 1 WHERE wallet_address = ? AND credits > 0',
+                [merchant_wallet]
+            );
+        }
 
         await req.db.execute(
             `INSERT INTO merchants (id, wallet_address, name, email) VALUES (?, ?, ?, ?)
