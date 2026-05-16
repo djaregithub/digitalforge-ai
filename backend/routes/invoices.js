@@ -16,14 +16,13 @@ function generateInvoiceCode() {
 // POST /api/invoices/create — Create a new invoice
 router.post('/create', async (req, res) => {
     try {
-        const { amount, token, merchant_wallet, merchant_name, email_merchant, memo, network } = req.body;
+        const { amount, token, merchant_wallet: mw, merchant_name, email_merchant, memo, network } = req.body;
+        let merchant_wallet = mw || process.env.DEFAULT_WALLET || '';
 
         // Validate
         if (!amount || !merchant_wallet) {
             if (!amount) return res.status(400).json({ error: 'amount is required' });
-            // Use default wallet if not provided
-            merchant_wallet = merchant_wallet || process.env.DEFAULT_WALLET;
-            if (!merchant_wallet) return res.status(400).json({ error: 'merchant_wallet is required or set DEFAULT_WALLET' });
+            if (!merchant_wallet) return res.status(400).json({ error: 'merchant_wallet required or set DEFAULT_WALLET' });
         }
         if (amount <= 0) {
             return res.status(400).json({ error: 'amount must be positive' });
