@@ -249,7 +249,7 @@
 
 <div class="container">
     <div class="card">
-        <div class="card-title">Create Invoice</div>
+        <div class="card-title">Create Invoice <span id="creditBadge" style="float:right;font-size:0.75rem;background:rgba(124,58,237,0.2);padding:0.2rem 0.6rem;border-radius:100px;color:#a78bfa">Credits: --</span></div>
         <form id="invoiceForm">
             <div class="form-group">
                 <label>Amount & Token</label>
@@ -367,6 +367,27 @@
         submitBtn.disabled = loading;
     }
 
+    // Load credit balance
+    async function loadCredits() {
+        const addr = wallet.value.trim();
+        if (!/^0x[a-fA-F0-9]{40}$/.test(addr)) return;
+        try {
+            const res = await fetch('/api/credits/balance/' + addr);
+            const data = await res.json();
+            if (data.success) {
+                const badge = document.getElementById('creditBadge');
+                badge.textContent = 'Credits: ' + data.credits;
+                badge.style.color = data.credits > 0 ? '#4ade80' : '#ef4444';
+            }
+        } catch(e) {}
+    }
+
+    // Load credits on wallet change
+    wallet.addEventListener('change', loadCredits);
+    window.addEventListener('load', function() {
+        if (wallet.value) setTimeout(loadCredits, 500);
+    });
+
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
         
@@ -393,6 +414,13 @@
             
             const data = await res.json();
             if (!data.success) throw new Error(data.error || 'Failed to create invoice');
+            
+            // If payment required
+            if (data.payment_required) {
+                showToast('No credits remaining! Buy more at /buy-credits', 'error');
+                setLoading(false);
+                return;
+            }
             
             // Show success
             modalQr.src = data.invoice.qr_base64;

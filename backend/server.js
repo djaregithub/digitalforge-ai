@@ -25,6 +25,11 @@ app.get('/create', (req, res) => {
 app.get('/pay/:code', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'frontend', 'pay.html'));
 });
+app.get('/buy-credits', (req, res) => {
+    let html = fs.readFileSync(path.join(__dirname, '..', 'frontend', 'buy-credits.html'), 'utf8');
+    html = html.replace('__DEFAULT_WALLET__', process.env.DEFAULT_WALLET || '');
+    res.send(html);
+});
 
 // Database pool
 let db;
