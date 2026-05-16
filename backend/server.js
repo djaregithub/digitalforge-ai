@@ -14,6 +14,14 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
+// SPA-style routes — serve HTML for clean URLs
+app.get('/create', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'create.html'));
+});
+app.get('/pay/:code', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'pay.html'));
+});
+
 // Database pool
 let db;
 async function initDB() {
