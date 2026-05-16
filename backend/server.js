@@ -28,8 +28,12 @@ app.get('/pay/:code', (req, res) => {
 // Database pool
 let db;
 async function initDB() {
+    // Force IPv4 — Hostinger resolves localhost to ::1 which breaks MySQL auth
+    let dbHost = process.env.DB_HOST || 'localhost';
+    if (dbHost === 'localhost' || dbHost === '127.0.0.1') dbHost = '127.0.0.1';
+
     db = await mysql.createPool({
-        host: process.env.DB_HOST || 'localhost',
+        host: dbHost,
         user: process.env.DB_USER || 'root',
         password: process.env.DB_PASS || '',
         database: process.env.DB_NAME || 'digitalforge',
