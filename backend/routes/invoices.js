@@ -67,6 +67,7 @@ router.post('/create', async (req, res) => {
 
         res.json({
             success: true,
+            credits_remaining: credits - 1,
             invoice: {
                 id, invoice_code: invoiceCode, payment_url: paymentUrl,
                 amount, token: selectedToken, network: selectedNetwork,

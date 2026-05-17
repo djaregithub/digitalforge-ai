@@ -412,6 +412,12 @@
                 })
             });
             
+            if (res.status === 402) {
+                showToast('No credits remaining! Buy more:', 'error');
+                setTimeout(() => { window.location.href = '/buy-credits'; }, 2000);
+                setLoading(false);
+                return;
+            }
             const data = await res.json();
             if (!data.success) throw new Error(data.error || 'Failed to create invoice');
             
@@ -427,7 +433,13 @@
             paymentUrl.value = data.invoice.payment_url;
             waBtn.href = 'https://wa.me/?text=Pay%20my%20invoice:%20'+encodeURIComponent(data.invoice.payment_url);
             overlay.classList.add('show');
-            showToast('Invoice created! Share the link with your client', 'success');
+            showToast('Invoice created! ' + (data.credits_remaining !== undefined ? 'Credits left: ' + data.credits_remaining : ''), 'success');
+            // Refresh credit badge
+            if (data.credits_remaining !== undefined) {
+                const badge = document.getElementById('creditBadge');
+                badge.textContent = 'Credits: ' + data.credits_remaining;
+                badge.style.color = data.credits_remaining > 0 ? '#4ade80' : '#ef4444';
+            }
         } catch(err) {
             showToast(err.message, 'error');
         } finally {
