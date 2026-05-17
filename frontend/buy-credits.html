@@ -83,7 +83,9 @@
                 <li>No expiry</li>
                 <li>QR code included</li>
             </ul>
+            <button class="select-btn" data-plan="${key}" style="width:100%;margin-top:1rem;padding:0.7rem;background:${key === 'pro' ? 'linear-gradient(135deg,#7c3aed,#3b82f6)' : 'rgba(255,255,255,0.05)'};border:${key === 'pro' ? 'none' : '1px solid rgba(255,255,255,0.1)'};border-radius:8px;color:#fff;font-weight:600;cursor:pointer;font-size:0.9rem;transition:all 0.2s">Select — $${p.usdt} USDT</button>
         `;
+        div.querySelector('.select-btn').onclick = (e) => { e.stopPropagation(); selectPlan(key); };
         div.onclick = () => selectPlan(key);
         plansDiv.appendChild(div);
     });
