@@ -44,10 +44,10 @@ app.get('/blog/:slug', (req, res) => {
     const posts = JSON.parse(fs.readFileSync(path.join(blogDir, 'posts.json'), 'utf8'));
     const post = posts.find(p => p.slug === req.params.slug);
     if (!post) return res.redirect('/blog');
-    let html = template.replace('__TITLE__', post.title)
-        .replace('__DESC__', post.desc)
-        .replace('__DATE__', post.date)
-        .replace('__CONTENT__', post.content);
+    let html = template.replaceAll('__TITLE__', post.title)
+        .replaceAll('__DESC__', post.desc)
+        .replaceAll('__DATE__', post.date)
+        .replaceAll('__CONTENT__', post.content);
     res.send(html);
 });
 
