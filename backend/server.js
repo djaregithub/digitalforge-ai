@@ -31,15 +31,14 @@ app.get('/buy-credits', (req, res) => {
     html = html.replace('__DEFAULT_WALLET__', process.env.DEFAULT_WALLET || '');
     res.send(html);
 });
-// SEO market pages
-app.get('/crypto-invoice-:country-:city', (req, res) => {
-    const file = path.join(__dirname, '..', 'frontend', 'markets', `crypto-invoice-${req.params.country}-${req.params.city}.html`);
+// SEO market pages - dynamic catch-all
+app.get('/crypto-invoice-*', (req, res) => {
+    const slug = req.params[0] ? `crypto-invoice-${req.params[0]}` : '';
+    const file = path.join(__dirname, '..', 'frontend', 'markets', `${slug}.html`);
     if (fs.existsSync(file)) return res.sendFile(file);
-    res.redirect('/');
-});
-app.get('/crypto-invoice-:country', (req, res) => {
-    const file = path.join(__dirname, '..', 'frontend', 'markets', `crypto-invoice-${req.params.country}.html`);
-    if (fs.existsSync(file)) return res.sendFile(file);
+    // Try partial match (e.g. /crypto-invoice-nigeria-lagos)
+    const altFile = path.join(__dirname, '..', 'frontend', 'markets', `${slug.split('-').slice(0,3).join('-')}.html`);
+    if (fs.existsSync(altFile)) return res.sendFile(altFile);
     res.redirect('/');
 });
 
