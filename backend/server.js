@@ -31,6 +31,17 @@ app.get('/buy-credits', (req, res) => {
     html = html.replace('__DEFAULT_WALLET__', process.env.DEFAULT_WALLET || '');
     res.send(html);
 });
+// SEO market pages
+app.get('/crypto-invoice-:country-:city', (req, res) => {
+    const file = path.join(__dirname, '..', 'frontend', 'markets', `crypto-invoice-${req.params.country}-${req.params.city}.html`);
+    if (fs.existsSync(file)) return res.sendFile(file);
+    res.redirect('/');
+});
+app.get('/crypto-invoice-:country', (req, res) => {
+    const file = path.join(__dirname, '..', 'frontend', 'markets', `crypto-invoice-${req.params.country}.html`);
+    if (fs.existsSync(file)) return res.sendFile(file);
+    res.redirect('/');
+});
 
 // Database pool
 let db;
