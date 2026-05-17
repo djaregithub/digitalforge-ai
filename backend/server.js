@@ -31,6 +31,26 @@ app.get('/buy-credits', (req, res) => {
     html = html.replace('__DEFAULT_WALLET__', process.env.DEFAULT_WALLET || '');
     res.send(html);
 });
+// Blog routes
+app.get('/blog', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'blog', 'index.html'));
+});
+app.get('/blog/:slug', (req, res) => {
+    const blogDir = path.join(__dirname, '..', 'frontend', 'blog', 'posts');
+    const file = path.join(blogDir, `${req.params.slug}.html`);
+    if (fs.existsSync(file)) return res.sendFile(file);
+    // Serve from template (generate on-the-fly)
+    const template = fs.readFileSync(path.join(__dirname, '..', 'frontend', 'blog', 'template.html'), 'utf8');
+    const posts = JSON.parse(fs.readFileSync(path.join(blogDir, 'posts.json'), 'utf8'));
+    const post = posts.find(p => p.slug === req.params.slug);
+    if (!post) return res.redirect('/blog');
+    let html = template.replace('__TITLE__', post.title)
+        .replace('__DESC__', post.desc)
+        .replace('__DATE__', post.date)
+        .replace('__CONTENT__', post.content);
+    res.send(html);
+});
+
 // SEO market pages - dynamic catch-all
 app.get('/crypto-invoice-*', (req, res) => {
     const slug = req.params[0] ? `crypto-invoice-${req.params[0]}` : '';

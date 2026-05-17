@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - DigitalForge AI</title>
+    <meta name="description" content="Learn about crypto payments, stablecoin invoicing, and how freelancers can get paid in USDT/USDC.">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:#0a0a0f;color:#e0e0e0}
+        .bg-glow{position:fixed;top:-50%;left:-50%;width:200%;height:200%;z-index:-1;background:radial-gradient(ellipse at 20% 50%,rgba(124,58,237,0.12) 0%,transparent 50%),radial-gradient(ellipse at 80% 20%,rgba(59,130,246,0.08) 0%,transparent 50%)}
+        nav{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 2rem;max-width:1200px;margin:0 auto}
+        .logo{font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,#7c3aed,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .nav-links{display:flex;gap:2rem;align-items:center}
+        .nav-links a{color:#a0a0a8;text-decoration:none;font-size:.9rem}
+        .nav-links a:hover{color:#fff}
+        .btn-nav{background:linear-gradient(135deg,#7c3aed,#3b82f6);color:#fff!important;padding:.6rem 1.5rem;border-radius:8px;font-weight:600}
+        .container{max-width:900px;margin:0 auto;padding:3rem 2rem}
+        h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#a78bfa,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.5rem}
+        .subtitle{color:#888;margin-bottom:3rem;font-size:1.1rem}
+        .post{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:2rem;margin-bottom:1.5rem;transition:all .3s}
+        .post:hover{border-color:rgba(124,58,237,0.3);transform:translateY(-2px)}
+        .post .date{font-size:.8rem;color:#666;margin-bottom:.3rem}
+        .post h2{font-size:1.3rem;font-weight:600;margin-bottom:.5rem}
+        .post h2 a{color:#e0e0e0;text-decoration:none}
+        .post h2 a:hover{color:#a78bfa}
+        .post p{color:#888;font-size:.9rem;line-height:1.6}
+        .post .tag{display:inline-block;background:rgba(124,58,237,0.15);color:#a78bfa;padding:.15rem .5rem;border-radius:100px;font-size:.7rem;margin-right:.3rem}
+        footer{text-align:center;padding:2rem;color:#444;font-size:.85rem;border-top:1px solid rgba(255,255,255,.05);margin-top:3rem}
+    </style>
+</head>
+<body>
+<div class="bg-glow"></div>
+<nav>
+    <a href="/" class="logo" style="text-decoration:none">DigitalForge<span style="color:#e0e0e0;-webkit-text-fill-color:#e0e0e0"> AI</span></a>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/create">Create Invoice</a>
+        <a href="/blog">Blog</a>
+    </div>
+</nav>
+<div class="container">
+    <h1>Blog</h1>
+    <p class="subtitle">Tips, guides, and news about crypto payments for freelancers</p>
+    <div id="posts"></div>
+</div>
+<footer>Powered by DigitalForge AI &mdash; Autonomous Crypto Invoicing &bull; &copy; 2026</footer>
+<script>
+const posts = [
+    {title:"How Freelancers Can Get Paid in USDT — Complete Guide 2026",date:"May 15, 2026",slug:"freelancer-usdt-payment-guide",tag:"Guide",desc:"Step-by-step guide on accepting stablecoin payments as a freelancer. Save 5-10% on fees compared to PayPal."},
+    {title:"Why Nigerian Freelancers Are Switching to Crypto Payments",date:"May 14, 2026",slug:"nigerian-freelancers-crypto-payments",tag:"Market",desc:"With 69% crypto adoption and $59B in transaction volume, Nigeria leads the crypto freelancing revolution."},
+    {title:"What Are Stablecoins and How Do They Work?",date:"May 13, 2026",slug:"what-are-stablecoins",tag:"Education",desc:"Understand USDT, USDC, and how stablecoins maintain their peg. Why they're perfect for freelancer payments."},
+    {title:"Polygon Network vs Ethereum: Which Is Better for Payments?",date:"May 12, 2026",slug:"polygon-vs-ethereum-payments",tag:"Tech",desc:"Polygon offers gas fees under $0.01 compared to Ethereum's $1-5. Why it matters for your bottom line."},
+    {title:"5 Common Mistakes Freelancers Make With International Payments",date:"May 11, 2026",slug:"freelancer-payment-mistakes",tag:"Tips",desc:"Avoid chargebacks, currency conversion losses, and bank delays. How crypto solves these problems."},
+    {title:"Top 10 Countries for Crypto Freelancing in 2026",date:"May 10, 2026",slug:"top-countries-crypto-freelancing",tag:"Market",desc:"Nigeria, Argentina, Philippines, and more. Where the gig economy meets crypto adoption."},
+    {title:"How to Create a Professional Crypto Invoice in 10 Seconds",date:"May 9, 2026",slug:"create-crypto-invoice-quick",tag:"Tutorial",desc:"Use DigitalForge AI to generate a professional USDT/USDC invoice with QR code instantly."},
+    {title:"Crypto Chargebacks: Why They Don't Exist and What It Means",date:"May 8, 2026",slug:"crypto-no-chargebacks",tag:"Education",desc:"Once a crypto transaction is confirmed, it's final. Why this is a game-changer for freelancers."},
+];
+const container = document.getElementById("posts");
+posts.forEach(p => {
+    container.innerHTML += `<div class="post"><div class="date">${p.date}</div><span class="tag">${p.tag}</span><h2><a href="/blog/${p.slug}">${p.title}</a></h2><p>${p.desc}</p></div>`;
+});
+</script>
+</body>
+</html>
